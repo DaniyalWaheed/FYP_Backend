@@ -36,6 +36,7 @@ from bson import ObjectId
 
 def readCsv(datasetName):
     print("Dataset Name", datasetName)
+    # data = ""
     datasetName = datasetName.lower()
     if datasetName == "isbsg":
         data = pd.read_csv(os.getcwd() +
@@ -51,6 +52,7 @@ def readCsv(datasetName):
         data = pd.read_csv(a)
     X = data.drop(data.columns[-1], axis=1)
     y = data[data.columns[-1]]
+    data = data.drop(data.columns[-1], axis=1)
     # X = X.drop(["Total Defects Delivered"], axis=1)
     return data, X, y
 
@@ -115,8 +117,8 @@ def conversion_to_defects(data):
     return y
 
 
-@decorators.api_view(["POST"])
-@decorators.permission_classes([permissions.AllowAny])
+@ decorators.api_view(["POST"])
+@ decorators.permission_classes([permissions.AllowAny])
 def getFeaturesNames(request):
     print("Request getFeaturesNames", request.data)
     dataset = request.data['csvFile']
@@ -124,8 +126,8 @@ def getFeaturesNames(request):
     return Response({"columns": X.columns})
 
 
-@decorators.api_view(["POST"])
-@decorators.permission_classes([permissions.AllowAny])
+@ decorators.api_view(["POST"])
+@ decorators.permission_classes([permissions.AllowAny])
 def applyMLAlgo(request):
     from sklearn.metrics import f1_score
     from sklearn.metrics import precision_score
