@@ -52,7 +52,7 @@ def readCsv(datasetName):
         data = pd.read_csv(a)
     X = data.drop(data.columns[-1], axis=1)
     y = data[data.columns[-1]]
-    data = data.drop(data.columns[-1], axis=1)
+    # data = data.drop(data.columns[-1], axis=1)
     # X = X.drop(["Total Defects Delivered"], axis=1)
     return data, X, y
 
@@ -92,6 +92,7 @@ def conversion_to_defects(data):
     #     return data.columns[-1]
 
     def checkDefects(col):
+        # print("col : ",col)
         if col != 0:
             if col <= 10:
                 return "Low"
@@ -108,9 +109,9 @@ def conversion_to_defects(data):
         else:
             return 0
     a = data[data.columns[-1]].apply(checkDefects)
-    # print(a)
+    print(a)
     new = pd.get_dummies(a)
-    # print(new)
+    print(new)
     new["Defects Present"] = new["Defects Present"].apply(invertValues)
     defect_present = new['Defects Present']
     y = defect_present

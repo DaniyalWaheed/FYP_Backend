@@ -34,6 +34,7 @@ def getFeaturesNames(request):
     print("Request getFeaturesNames", request.data)
     dataset = request.data['datasetName']
     data, X, y = projectapiView.readCsv(dataset)
+    data = data.drop(data.columns[-1], axis=1)
     return Response(data.columns)
 
 
