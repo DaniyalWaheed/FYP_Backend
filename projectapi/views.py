@@ -141,7 +141,7 @@ def applyMLAlgo(request):
     features = request.data['features']
     mlAlgo = request.data['mlAlgo']
     datasetFile = request.data["csvFile"]
-    ensemble = request.data["ensemble"]
+    # ensemble = request.data["ensemble"]
     classification = request.data['classificationType']
     data, X, y = readCsv(datasetFile)
     if(classification == "Binary"):
@@ -159,10 +159,8 @@ def applyMLAlgo(request):
     X = data[featuresNames]
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.3, random_state=10)
-    if(ensemble == "true"):
-        model = ensemblingMethod(request.data["ensembleMethod"])
-    else:
-        model = mlAlgoList(mlAlgo)
+
+    model = mlAlgoList(mlAlgo)
     model.fit(X_train, y_train)
     prediction = model.predict(X_test)
     result = model.predict([[float(i) for i in featuresValues]])
@@ -329,7 +327,7 @@ def ensemblingMethod(ensembleMethod):
         m5 = GaussianNB()
         model = StackingClassifier(estimators=[(
             'lr', m1), ("de", m2), ("deas", m3), ("deass", m4)], final_estimator=LogisticRegression())
-    elif ( ensembleMethod== 'Extra Trees Classifier'):
+    elif (ensembleMethod == 'Extra Trees Classifier'):
         from sklearn.ensemble import ExtraTreesClassifier
         model = ExtraTreesClassifier(n_estimators=300, random_state=2)
     elif (ensembleMethod == 'Random Forest Classifier'):
@@ -531,8 +529,40 @@ def mlAlgoList(mlAlgo):
         from sklearn.calibration import CalibratedClassifierCV
         model = SGDClassifier(max_iter=1000, tol=1e-3,
                               random_state=1, class_weight='balanced')
-        # calibrator = CalibratedClassifierCV(model, cv='prefit')
-        # model = calibrator
+    if(mlAlgo == "Bagging Classifier"):
+        from sklearn.neighbors import KNeighborsClassifier
+        from sklearn import model_selection
+        from sklearn.ensemble import BaggingClassifier
+        model1 = KNeighborsClassifier()
+        seed = 8
+        kfold = model_selection.KFold(n_splits=3,
+                                      random_state=seed)
+        base_cls = model1
+        num_trees = 500
+        model = BaggingClassifier(base_estimator=base_cls, n_estimators=1000)
+    elif (mlAlgo == "Boosting Classifier"):
+        from sklearn.ensemble import GradientBoostingClassifier
+        model = GradientBoostingClassifier(n_estimators=100)
+    elif(mlAlgo == "Voting Classifier"):
+        from sklearn.ensemble import VotingClassifier
+        from sklearn.tree import DecisionTreeClassifier
+        from sklearn.neighbors import KNeighborsClassifier
+        from sklearn.svm import SVC
+        m1 = KNeighborsClassifier()
+        m2 = DecisionTreeClassifier()
+        m3 = SVC()
+        model = VotingClassifier(
+            estimators=[('lr', m1), ('dt', m2), ("svc", m3)], voting='hard')
+    elif(mlAlgo == "Stacking Classifier"):
+        from sklearn.linear_model import LogisticRegression
+        from sklearn.ensemble import StackingClassifier
+        m1 = KNeighborsClassifier()
+        m2 = DecisionTreeClassifier()
+        m3 = SVC()
+        m4 = LogisticRegression()
+        m5 = GaussianNB()
+        model = StackingClassifier(estimators=[(
+            'lr', m1), ("de", m2), ("deas", m3), ("deass", m4)], final_estimator=LogisticRegression())
     return model
 
 
