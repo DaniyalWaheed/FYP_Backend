@@ -141,6 +141,7 @@ def applyMLAlgo(request):
     features = request.data['features']
     mlAlgo = request.data['mlAlgo']
     datasetFile = request.data["csvFile"]
+    ensemble = request.data["ensemble"]
     classification = request.data['classificationType']
     data, X, y = readCsv(datasetFile)
     if(classification == "Binary"):
@@ -157,8 +158,11 @@ def applyMLAlgo(request):
         featuresValues.append(i[1])
     X = data[featuresNames]
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.3, random_state=40)
-    model = mlAlgoList(mlAlgo)
+        X, y, test_size=0.3, random_state=10)
+    if(ensemble == "true"):
+        model = ensemblingMethod(request.data["ensembleMethod"])
+    else:
+        model = mlAlgoList(mlAlgo)
     model.fit(X_train, y_train)
     prediction = model.predict(X_test)
     result = model.predict([[float(i) for i in featuresValues]])
@@ -282,22 +286,81 @@ def projectapi_getFeatures(request):
     return Response(list)
 
 
-def projectapi_getFeatures1(method):
-    method = request.data["method"]
-    print(request.data)
-    list = comparisonView.returnFeatuesList(method, 'decisiontree')
-    print(list)
+def ensemblingMethod(ensembleMethod):
+    from sklearn.tree import DecisionTreeClassifier
+    from sklearn.neighbors import KNeighborsClassifier
+    from sklearn.svm import SVC
+    if(ensembleMethod == "Bagging Classifier"):
+        from sklearn.neighbors import KNeighborsClassifier
+        from sklearn import model_selection
+        from sklearn.ensemble import BaggingClassifier
+        model1 = KNeighborsClassifier()
+        seed = 8
+        kfold = model_selection.KFold(n_splits=3,
+                                      random_state=seed)
+        base_cls = model1
+        num_trees = 500
+        model = BaggingClassifier(base_estimator=base_cls, n_estimators=1000)
+    elif (ensembleMethod == "Boosting Classifier"):
+        from sklearn.ensemble import GradientBoostingClassifier
+        model = GradientBoostingClassifier(n_estimators=100)
+    elif(ensembleMethod == "Voting Classifier"):
+        from sklearn.ensemble import VotingClassifier
+        from sklearn.tree import DecisionTreeClassifier
+        from sklearn.neighbors import KNeighborsClassifier
+        from sklearn.svm import SVC
+        # mlalgos = []
+        # print(mlAlgoList)
+        # m1 = mlAlgoList(mlAlgoList[0])
+        # m2 = mlAlgoList(mlAlgoList[1])
+        # m3 = mlAlgoList(mlAlgoList[2])
+        m1 = KNeighborsClassifier()
+        m2 = DecisionTreeClassifier()
+        m3 = SVC()
+        model = VotingClassifier(
+            estimators=[('lr', m1), ('dt', m2), ("svc", m3)], voting='hard')
+    elif(ensembleMethod == "Stacking Classifier"):
+        from sklearn.linear_model import LogisticRegression
+        from sklearn.ensemble import StackingClassifier
+        m1 = KNeighborsClassifier()
+        m2 = DecisionTreeClassifier()
+        m3 = SVC()
+        m4 = LogisticRegression()
+        m5 = GaussianNB()
+        model = StackingClassifier(estimators=[(
+            'lr', m1), ("de", m2), ("deas", m3), ("deass", m4)], final_estimator=LogisticRegression())
+    elif ( ensembleMethod== 'Extra Trees Classifier'):
+        from sklearn.ensemble import ExtraTreesClassifier
+        model = ExtraTreesClassifier(n_estimators=300, random_state=2)
+    elif (ensembleMethod == 'Random Forest Classifier'):
+        from sklearn.ensemble import RandomForestClassifier
+        model = RandomForestClassifier(n_estimators=300, random_state=42)
+    elif (ensembleMethod == 'Ada Boost Classifier'):
+        from sklearn.ensemble import AdaBoostClassifier
+        model = AdaBoostClassifier(n_estimators=500)
+    return model
+
+
+def projectapi_getFeatures1(method, datasetName):
+    # method = request.data["method"]
+    # print(request.data)
+    list = comparisonView.returnFeatuesList(
+        method, 'decisiontree', datasetName)
+    print("List : ", list)
     return (list)
 
 
 @ decorators.api_view(["POST"])
 @ decorators.permission_classes([permissions.AllowAny])
 def applyBaggingAlgo(request):
-    model = request.data['model']
+    print(request.data)
+    method1 = request.data["method1"]
+    method2 = request.data['method2']
+    datasetName = request.data["datasetName"]
     numberOfEstimators = request.data['estimators']
-    data, X = readCsv()
-    method = "kbest"
-    X = projectapi_getFeatures1(method)
+    data, X, y = readCsv(datasetName)
+    # method = "kbest"
+    X = projectapi_getFeatures1(method1, datasetName)
     X = data[X]
     y = conversion_to_defects(data)
     # min_max_scaler = preprocessing.MinMaxScaler()
