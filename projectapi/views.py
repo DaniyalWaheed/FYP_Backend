@@ -109,9 +109,9 @@ def conversion_to_defects(data):
         else:
             return 0
     a = data[data.columns[-1]].apply(checkDefects)
-    print(a)
+    # print(a)
     new = pd.get_dummies(a)
-    print(new)
+    # print(new)
     new["Defects Present"] = new["Defects Present"].apply(invertValues)
     defect_present = new['Defects Present']
     y = defect_present
@@ -121,7 +121,7 @@ def conversion_to_defects(data):
 @ decorators.api_view(["POST"])
 @ decorators.permission_classes([permissions.AllowAny])
 def getFeaturesNames(request):
-    print("Request getFeaturesNames", request.data)
+    # print("Request getFeaturesNames", request.data)
     dataset = request.data['csvFile']
     data, X, y = readCsv(dataset)
     return Response({"columns": X.columns})
@@ -137,7 +137,7 @@ def applyMLAlgo(request):
     from sklearn.metrics import roc_auc_score
     from sklearn.metrics import precision_recall_curve
     from sklearn.metrics import auc
-    print("Request", request.data)
+    # print("Request", request.data)
     features = request.data['features']
     mlAlgo = request.data['mlAlgo']
     datasetFile = request.data["csvFile"]
@@ -168,7 +168,7 @@ def applyMLAlgo(request):
         # For Post Prediction
         if(mlAlgo == 'Ridge'):
             lr_probs = model.decision_function(X_test)
-            print(lr_probs)
+            # print(lr_probs)
         else:
             lr_probs = model.predict_proba(X_test)
         lr_probs = lr_probs[:, 1]
@@ -209,7 +209,7 @@ def resultOfMl(result, auc, roc, y_test, prediction):
     matrix = confusion_matrix(y_test, prediction)
     report = classification_report(
         y_test, prediction, output_dict=True)
-    print(result)
+    # print(result)
     if(result[0] == 0):
         res = "No Defects Detected"
     elif(result[0] == 1):
@@ -244,7 +244,7 @@ def multiclass_roc_auc_score(y_test, y_pred, average="macro"):
 @ decorators.api_view(["POST"])
 @ decorators.permission_classes([permissions.AllowAny])
 def applyMLAlgoWithRegression(request):
-    print("applyMLAlgoWithRegression", request.data)
+    # print("applyMLAlgoWithRegression", request.data)
     features = request.data['features']
     mlAlgo = request.data['mlAlgo']
     datasetFile = request.data["csvFile"]
@@ -263,9 +263,9 @@ def applyMLAlgoWithRegression(request):
     prediction = model.predict(X_test)
     result = model.predict([[float(i) for i in featuresValues]])
     score = model.score(X_test, y_test)
-    print("Score: ", score)
+    # print("Score: ", score)
     result = model.predict([[float(i) for i in featuresValues]])
-    print("Result", result[0])
+    # print("Result", result[0])
     a = {"result": int(result),
          "score": int(score*100)
          }
@@ -277,10 +277,10 @@ def applyMLAlgoWithRegression(request):
 def projectapi_getFeatures(request):
     method = request.data["method"]
     # datasetName = request.data["csvFile"]
-    print(request.data)
+    # print(request.data)
     list = comparisonView.returnFeatuesList(
         method, 'decisiontree', request.data['csvFile'])
-    print(list)
+    # print(list)
     return Response(list)
 
 
@@ -344,14 +344,14 @@ def projectapi_getFeatures1(method, datasetName):
     # print(request.data)
     list = comparisonView.returnFeatuesList(
         method, 'decisiontree', datasetName)
-    print("List : ", list)
+    # print("List : ", list)
     return (list)
 
 
 @ decorators.api_view(["POST"])
 @ decorators.permission_classes([permissions.AllowAny])
 def applyBaggingAlgo(request):
-    print(request.data)
+    # print(request.data)
     method1 = request.data["method1"]
     method2 = request.data['method2']
     datasetName = request.data["datasetName"]
@@ -392,8 +392,8 @@ def applyBaggingAlgo(request):
     model = BaggingClassifier(base_estimator=base_cls,
                               n_estimators=1000)
     results = model_selection.cross_val_score(model, X, y, cv=kfold)
-    print("accuracy :")
-    print(results.mean())
+    # print("accuracy :")
+    # print(results.mean())
     return Response(results.mean())
 
 
@@ -425,7 +425,7 @@ def applyBoostingAlgo(request):
         clf.fit(X_train, y_train)
         clf.predict(X_test)
         a = clf.score(X_test, y_test)
-        print(a)
+        # print(a)
     elif model == 'extratree':
         from sklearn.ensemble import ExtraTreesClassifier
         model = ExtraTreesClassifier(n_estimators=numberOfEstimators)
@@ -446,7 +446,7 @@ def applyBoostingAlgo(request):
 
 def conversion(arr1, arr2):
     arr = []
-    print(arr2)
+    # print(arr2)
     for z in range(len(arr2)):
         arr.append({"x": arr1[z], "y": arr2[z]})
     return arr
@@ -573,7 +573,7 @@ def mlAlgoList(mlAlgo):
 @ decorators.api_view(["POST"])
 @ decorators.permission_classes([permissions.AllowAny])
 def savePreviousProjects(request):
-    print(request.data)
+    # print(request.data)
     # _id = request.data["_id"]
     user_id = request.data['user_id']
     state = request.data['state']
@@ -585,14 +585,14 @@ def savePreviousProjects(request):
 @ decorators.api_view(["POST"])
 @ decorators.permission_classes([permissions.AllowAny])
 def getUserlog(request):
-    print(request.data)
+    # print(request.data)
     # user_id = request.data['id']
     # logs = previousProjects.objects.all().filter(user_id=userName)
 
     userName = request.data['username']
 
     logs1 = previousProjects.objects.all()
-    print("data: ", logs1[0]._id)
+    # print("data: ", logs1[0]._id)
 
     logs = previousProjects.objects.all().filter(user_id=userName)
     data = [{'userName': record.user_id, "log_id": str(record._id), 'state': record.state}
@@ -603,9 +603,9 @@ def getUserlog(request):
 @ decorators.api_view(["POST"])
 @ decorators.permission_classes([permissions.AllowAny])
 def deleteUserlog(request):
-    print(request.data)
+    # print(request.data)
     user_id = request.data['id']
     log = previousProjects.objects.get(_id=ObjectId(user_id))
-    print("Logs", log.user_id)
+    # print("Logs", log.user_id)
     log.delete()
     return Response("Successfully Deleted")
