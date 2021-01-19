@@ -517,7 +517,7 @@ def mlAlgoList(mlAlgo):
     elif (mlAlgo == 'Ada Boost'):
         from sklearn.ensemble import AdaBoostClassifier
         model = AdaBoostClassifier(n_estimators=500)
-    elif(mlAlgo == 'MLP'):
+    elif(mlAlgo == 'Multilayer Perceptron'):
         from sklearn.neural_network import MLPClassifier
         model = MLPClassifier(activation='tanh', alpha=0.05, hidden_layer_sizes=100,
                               learning_rate='constant', solver='adam', random_state=1)
@@ -529,7 +529,7 @@ def mlAlgoList(mlAlgo):
         from sklearn.calibration import CalibratedClassifierCV
         model = SGDClassifier(max_iter=1000, tol=1e-3,
                               random_state=1, class_weight='balanced')
-    if(mlAlgo == "Bagging Classifier"):
+    if(mlAlgo == "Bagging"):
         from sklearn.neighbors import KNeighborsClassifier
         from sklearn import model_selection
         from sklearn.ensemble import BaggingClassifier
@@ -540,10 +540,10 @@ def mlAlgoList(mlAlgo):
         base_cls = model1
         num_trees = 500
         model = BaggingClassifier(base_estimator=base_cls, n_estimators=1000)
-    elif (mlAlgo == "Boosting Classifier"):
+    elif (mlAlgo == "Boosting"):
         from sklearn.ensemble import GradientBoostingClassifier
         model = GradientBoostingClassifier(n_estimators=100)
-    elif(mlAlgo == "Voting Classifier"):
+    elif(mlAlgo == "Voting"):
         from sklearn.ensemble import VotingClassifier
         from sklearn.tree import DecisionTreeClassifier
         from sklearn.neighbors import KNeighborsClassifier
@@ -553,7 +553,7 @@ def mlAlgoList(mlAlgo):
         m3 = SVC()
         model = VotingClassifier(
             estimators=[('lr', m1), ('dt', m2), ("svc", m3)], voting='hard')
-    elif(mlAlgo == "Stacking Classifier"):
+    elif(mlAlgo == "Stacking"):
         from sklearn.linear_model import LogisticRegression
         from sklearn.ensemble import StackingClassifier
         m1 = KNeighborsClassifier()
