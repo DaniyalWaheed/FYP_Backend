@@ -554,13 +554,16 @@ def mlAlgoList(mlAlgo):
         model = VotingClassifier(
             estimators=[('lr', m1), ('dt', m2), ("svc", m3)], voting='hard')
     elif(mlAlgo == "Stacking"):
+        from sklearn.neighbors import KNeighborsClassifier
         from sklearn.linear_model import LogisticRegression
         from sklearn.ensemble import StackingClassifier
+        from sklearn.tree import DecisionTreeClassifier
+        from sklearn.svm import SVC
         m1 = KNeighborsClassifier()
         m2 = DecisionTreeClassifier()
         m3 = SVC()
         m4 = LogisticRegression()
-        m5 = GaussianNB()
+        # m5 = GaussianNB()
         model = StackingClassifier(estimators=[(
             'lr', m1), ("de", m2), ("deas", m3), ("deass", m4)], final_estimator=LogisticRegression())
     return model
